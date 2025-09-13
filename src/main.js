@@ -2,24 +2,41 @@ const blessed = require('blessed');
 const { Command } = require('commander');
 const chalk = require('chalk').default;
 const tmi = require('tmi.js');
+const path = require('path');  
+const fs = require('fs');
 
 require('dotenv').config();
 
 const program = new Command();
 
-const clientToken = process.env.TWITCH_PASSWORD;
+const configPath = path.resolve(__dirname, 'config.json');
+const configData = fs.readFileSync(configPath, 'utf8');
+const config = JSON.parse(configData);
+
+let randomStreamerList = config.streamer.names;
+let randomStreamer = randomStreamerList[Math.floor(Math.random() * randomStreamerList.length)];
+
+const clientToken = process.env.TWITCH_TOKEN;
 const username = process.env.TWITCH_USERNAME;
-var streamer = "vedal987"; 
+var streamer = randomStreamer; 
 let client;
+
+
+
+var runClient = true;
 
 function checkIfUserInfoExists() {
 		if (username === undefined && clientToken === undefined) {
-				console.log(chalk.red.bold("Please make an .env file with yout TWITCH_USERNAME and TWITCH_ACCESSTOKEN!"));
-				process.exit(0);
-		}
+				console.log(chalk.red.bold("Please make an .env file with yout TWITCH_USERNAME and TWITCH_TOKEN!"));
+				return false;
+		} 
+    return true;
 }
 
-checkIfUserInfoExists();
+let status = checkIfUserInfoExists();
+if (!status) {
+				process.exit(0);
+}
 
 var screen = blessed.screen({
   smartCSR: true,
@@ -82,27 +99,33 @@ screen.render();
 
 function checkForKeyboard(client,) {
 
-		 inputBox.on('submit', (value) => {
-				 let message = value.trim();
+     if (runClient) {
+				inputBox.on('submit', (value) => {
+		 		 	 let message = value.trim();
 
-				 if (message == "exit") {
-						 process.exit(0);
-				 }else if(message.startsWith("/streamer")) {
-						const parts = message.trim().split(' ');
-						if (parts.length >= 1) {
-								newStreamer(parts[1]);
-								inputBox.clearValue();
+		 		 	 if (message == "exit") {
+		 		 			 process.exit(0);
+		 		 	 }else if(message.startsWith("/streamer")) {
+		 		 			const parts = message.trim().split(' ');
+		 		 			if (parts.length >= 1) {
+		 		 					newStreamer(parts[1]);
+		 		 					inputBox.clearValue();
 
-						}
-				 }else {
-						client.say(streamer,message).then(() => {
-								chat.log(`[#${streamer}] ${chalk.yellow.bold(username)}: ${message}`);
-								inputBox.focus();
-								inputBox.clearValue();
-						}).catch(console.error);
-				 }
+		 		 			}
+		 		 	 }else {
+		 		 			client.say(streamer,message).then(() => {
+		 		 					chat.log(`[#${streamer}] ${chalk.yellow.bold(username)}: ${message}`);
+		 		 					inputBox.focus();
+		 		 					inputBox.clearValue();
+		 		 			}).catch(console.error);
+		 		 	 }
 
-		});
+				});
+
+		 }else{
+						 chat.log("");
+						 chat.log(chalk.blue('Press "ESCAPE" and "q" to quit'));
+		 }
 		
 		screen.key(['q', 'C-c'], () => process.exit(0));
 
@@ -114,9 +137,27 @@ function main() {
     .name('Twitch-TUI')
     .description('Twitch chat TUI')
     .version("0");
-  
-  
-
+  program
+				.command('streamer')
+				.argument('<streamername>','open the tui with the chat of an specific streamer')
+				.description('the name of the streamer')
+				.action((streamerName) => {
+							streamer = streamerName
+				});
+  program
+				.command('tui')
+				.description('open the tui with a random streamer chat')
+  program
+				.command('setup')
+				.description('setup')
+				.action(() => {
+				runClient = false;
+				chat.log(chalk.red(`
+To be able to read and write chat messages,
+you have to setup a .env file with your ` + chalk.green(
+`TWITCH_USERNAME=YOUR_USERNAME `) + `and ` + chalk.green(`TWITCH_TOKEN=YOUR_ACCESS_TOKEN.`) 
+				));
+				});
 
   program.parse(process.argv);
 }
@@ -125,22 +166,43 @@ function main() {
 main();
 
 function initClient() {
-		client = new tmi.Client({
-        options: { debug: false },
-        connection: { reconnect: true },
-        identity: {
-          username: username, 
-          password: clientToken//https://twitchtokengenerator.com
-        },
-        channels: [ streamer ] 
-      });
+    if (runClient) {
+				client = new tmi.Client({
+    		    options: { debug: false},
+    		    connection: { reconnect: true },
+    		    identity: {
+    		      username: username, 
+    		      password: clientToken//https://twitchtokengenerator.com
+    		    },
+    		    channels: [ streamer ] 
+    		  });
 
-      client.connect().then(() => {
-		chat.log(chalk.green.bold(`Switching Client `));
-	  });
+    		client.connect().then(() => {
+						chat.log(chalk.green.bold(`Joined ${streamer} `));
+	  		}).catch(err => {
+						chat.log(chalk.red.bold(`Error Connecting to client! ${err}`));
+				});
 
-	  onChat(client);
+    		client.on('notice', (channel, msgid, message) => {
+						chat.log(chalk.red(`Twitch Notice (${msgid}): ${message}`));
+    		});
+    		client.on('error', (err) => {
+						chat.log(chalk.red.bold(`Error: ${err}`));
+    		});
 
+    		console.log = (... args) => {
+						const parts = args.toString().split('');
+						chat.log(chalk.yellow.bold("[Notice]: " + args ));
+						screen.render();
+    		}	
+
+    		inputBox.clearValue();
+
+	  		onChat(client);
+
+		}
+
+		checkForKeyboard(client);
 }
 
 initClient();
@@ -169,7 +231,6 @@ function onChat() {
 				screen.render();
 		});
 
-		checkForKeyboard(client);
 
 }
 
