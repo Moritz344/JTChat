@@ -98,6 +98,7 @@ inputBox.focus();
 screen.render();
 
 function checkForKeyboard(client,) {
+		 screen.key(['q', 'C-c'], () => process.exit(0));
      inputBox.removeAllListeners('submit');
 
      if (!client && client.readyState() !== "OPEN") {
@@ -133,7 +134,6 @@ function checkForKeyboard(client,) {
 						 chat.log(chalk.blue('Press "ESCAPE" and "q" to quit'));
 		 }
 		
-		screen.key(['q', 'C-c'], () => process.exit(0));
 
 }
 
@@ -157,12 +157,13 @@ function main() {
 				.command('setup')
 				.description('setup')
 				.action(() => {
-				runClient = false;
-				chat.log(chalk.red(`
+				console.log(chalk.red(`
 To be able to read and write chat messages,
 you have to setup a .env file with your ` + chalk.green(
 `TWITCH_USERNAME=YOUR_USERNAME `) + `and ` + chalk.green(`TWITCH_TOKEN=YOUR_ACCESS_TOKEN.`) 
 				));
+				console.log("");
+				process.exit(0);
 				});
 
   program.parse(process.argv);
