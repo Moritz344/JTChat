@@ -98,8 +98,14 @@ inputBox.focus();
 screen.render();
 
 function checkForKeyboard(client,) {
+     inputBox.removeAllListeners('submit');
 
-     if (runClient) {
+     if (!client && client.readyState() !== "OPEN") {
+				chat.log("Client not ready");
+				return;
+		 }
+
+     if (runClient  ) {
 				inputBox.on('submit', (value) => {
 		 		 	 let message = value.trim();
 
@@ -169,7 +175,7 @@ function initClient() {
     if (runClient) {
 				client = new tmi.Client({
     		    options: { debug: false},
-    		    connection: { reconnect: true },
+    		    connection: { reconnect: true},
     		    identity: {
     		      username: username, 
     		      password: clientToken//https://twitchtokengenerator.com
@@ -183,6 +189,12 @@ function initClient() {
 						chat.log(chalk.red.bold(`Error Connecting to client! ${err}`));
 				});
 
+				client.on('connected', (addr, port) => {
+								chat.log(chalk.green(`Connected to ${addr}:${port}`));
+								checkForKeyboard(client);
+				});
+
+
     		client.on('notice', (channel, msgid, message) => {
 						chat.log(chalk.red(`Twitch Notice (${msgid}): ${message}`));
     		});
@@ -190,11 +202,8 @@ function initClient() {
 						chat.log(chalk.red.bold(`Error: ${err}`));
     		});
 
-    		console.log = (... args) => {
-						const parts = args.toString().split('');
-						chat.log(chalk.yellow.bold("[Notice]: " + args ));
-						screen.render();
-    		}	
+
+
 
     		inputBox.clearValue();
 
@@ -202,7 +211,6 @@ function initClient() {
 
 		}
 
-		checkForKeyboard(client);
 }
 
 initClient();
