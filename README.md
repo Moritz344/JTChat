@@ -1,4 +1,4 @@
-# Twitch-TUI
+# JTChat
 a tui that lets you connect to twitch chats.
 
 <img width="1918" height="1080" alt="twitchChat" src="https://github.com/user-attachments/assets/0ca6da2d-ae6f-4bf7-970e-1a951972bc40" />
