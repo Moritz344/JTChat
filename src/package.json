@@ -1,23 +1,23 @@
 {
-  "name": "twitch-tui",
+  "name": "JTChat",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "a tui for reading twitch chat messages and chatting ",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Moritz344/Twitch-TUI.git"
+    "url": "git+https://github.com/Moritz344/JTChat.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/Moritz344/Twitch-TUI/issues"
+    "url": "https://github.com/Moritz344/JTChat/issues"
   },
-  "homepage": "https://github.com/Moritz344/Twitch-TUI#readme",
+  "homepage": "https://github.com/Moritz344/JTChat#readme",
   "dependencies": {
     "blessed": "^0.1.81",
     "chalk": "^5.6.2",
