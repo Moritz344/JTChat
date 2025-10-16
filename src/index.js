@@ -1,8 +1,9 @@
+#!/usr/bin/env node
 const blessed = require('blessed');
 const { Command } = require('commander');
 const chalk = require('chalk').default;
 const tmi = require('tmi.js');
-const path = require('path');  
+const path = require('path');
 const fs = require('fs');
 
 require('dotenv').config();
@@ -18,7 +19,7 @@ let randomStreamer = randomStreamerList[Math.floor(Math.random() * randomStreame
 
 const clientToken = process.env.TWITCH_TOKEN;
 const username = process.env.TWITCH_USERNAME;
-var streamer = randomStreamer; 
+var streamer = randomStreamer;
 let client;
 
 
@@ -29,7 +30,7 @@ function checkIfUserInfoExists() {
 		if (username === undefined && clientToken === undefined) {
 				console.log(chalk.red.bold("Please make an .env file with yout TWITCH_USERNAME and TWITCH_TOKEN!"));
 				return false;
-		} 
+		}
     return true;
 }
 
@@ -133,7 +134,7 @@ function checkForKeyboard(client,) {
 						 chat.log("");
 						 chat.log(chalk.blue('Press "ESCAPE" and "q" to quit'));
 		 }
-		
+
 
 }
 
@@ -160,7 +161,7 @@ function main() {
 				console.log(chalk.red(`
 To be able to read and write chat messages,
 you have to setup a .env file with your ` + chalk.green(
-`TWITCH_USERNAME=YOUR_USERNAME `) + `and ` + chalk.green(`TWITCH_TOKEN=YOUR_ACCESS_TOKEN.`) 
+`TWITCH_USERNAME=YOUR_USERNAME `) + `and ` + chalk.green(`TWITCH_TOKEN=YOUR_ACCESS_TOKEN.`)
 				));
 				console.log("");
 				process.exit(0);
@@ -178,10 +179,10 @@ function initClient() {
     		    options: { debug: false},
     		    connection: { reconnect: true},
     		    identity: {
-    		      username: username, 
+    		      username: username,
     		      password: clientToken//https://twitchtokengenerator.com
     		    },
-    		    channels: [ streamer ] 
+    		    channels: [ streamer ]
     		  });
 
     		client.connect().then(() => {
@@ -234,7 +235,7 @@ function newStreamer(new_streamer ) {
 
 function onChat() {
 		client.on('message', (channel, tags, message, self) => {
-				if (self) return; 
+				if (self) return;
 				const user = tags['display-name'] || tags.username;
 				chat.log(`[#${streamer}] ${chalk.blue(user)}: ${message}`);
 				screen.render();
