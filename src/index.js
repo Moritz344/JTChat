@@ -141,7 +141,7 @@ function checkForKeyboard(client,) {
 
 function main() {
   program
-    .name('Twitch-TUI')
+    .name('JTChat')
     .description('Twitch chat TUI')
     .version("0");
   program
