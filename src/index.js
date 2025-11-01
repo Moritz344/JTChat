@@ -1,24 +1,29 @@
 #!/usr/bin/env node
-const blessed = require('blessed');
-const { Command } = require('commander');
-const chalk = require('chalk').default;
-const tmi = require('tmi.js');
-const path = require('path');
-const fs = require('fs');
+import blessed from 'blessed';
+import { Command } from 'commander';
+import chalk from 'chalk';
+import tmi from 'tmi.js';
+import path from 'path';
+import fs from 'fs';
+import dotenv from 'dotenv';
 
-require('dotenv').config();
+dotenv.config();
 
 const program = new Command();
 
-const configPath = path.resolve(__dirname, 'config.json');
-const configData = fs.readFileSync(configPath, 'utf8');
-const config = JSON.parse(configData);
+const loadConfig = () => {
+    const configPath = path.resolve(process.cwd(), 'config.json');
+    const configData = fs.readFileSync(configPath, 'utf8');
+    return JSON.parse(configData);
+};
 
-let randomStreamerList = config.streamer.names;
-let randomStreamer = randomStreamerList[Math.floor(Math.random() * randomStreamerList.length)];
+const config = loadConfig();
+const randomStreamerList = config.streamer.names;
+const randomStreamer = randomStreamerList[Math.floor(Math.random() * randomStreamerList.length)];
 
 const clientToken = process.env.TWITCH_TOKEN;
 const username = process.env.TWITCH_USERNAME;
+
 var streamer = randomStreamer;
 let client;
 
