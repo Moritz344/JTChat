@@ -7,15 +7,22 @@ import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
-dotenv.config();
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+const envPath = path.join(__dirname, '.env');
+dotenv.config({path: envPath});
 
 const program = new Command();
 
 const loadConfig = () => {
-    const configPath = path.resolve(process.cwd(), 'config.json');
+    const configPath = path.join(__dirname, 'config.json');
     const configData = fs.readFileSync(configPath, 'utf8');
     return JSON.parse(configData);
 };
+
+const pkg = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "package.json"), "utf-8"),
+);
 
 const config = loadConfig();
 const randomStreamerList = config.streamer.names;
@@ -148,7 +155,7 @@ function main() {
   program
     .name('JTChat')
     .description('Twitch chat TUI')
-    .version("0");
+    .version(pkg.version);
   program
 				.command('streamer')
 				.argument('<streamername>','open the tui with the chat of an specific streamer')
